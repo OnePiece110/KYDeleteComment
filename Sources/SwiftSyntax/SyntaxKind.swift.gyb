@@ -1,0 +1,58 @@
+%{
+  from gyb_syntax_support import *
+  from gyb_syntax_support.kinds import SYNTAX_BASE_KINDS
+  # -*- mode: Swift -*-
+  # Ignore the following admonition; it applies to the resulting .swift file only
+}%
+//// Automatically Generated From SyntaxKind.swift.gyb.
+//// Do Not Edit Directly!
+//===--------------- SyntaxKind.swift - Syntax Kind definitions -----------===//
+//
+// This source file is part of the Swift.org open source project
+//
+// Copyright (c) 2014 - 2022 Apple Inc. and the Swift project authors
+// Licensed under Apache License v2.0 with Runtime Library Exception
+//
+// See https://swift.org/LICENSE.txt for license information
+// See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
+//
+//===----------------------------------------------------------------------===//
+
+/// Enumerates the known kinds of Syntax represented in the Syntax tree.
+internal enum SyntaxKind: CSyntaxKind {
+  case token = 0
+  case unknown = 1
+% for node in SYNTAX_NODES:
+  case ${node.swift_syntax_kind} = ${SYNTAX_NODE_SERIALIZATION_CODES[node.syntax_kind]}
+% end
+
+  var isSyntaxCollection: Bool {
+    switch self {
+% for node in SYNTAX_NODES:
+%   if node.base_kind == "SyntaxCollection":
+    case .${node.swift_syntax_kind}: return true
+%   end
+% end
+    case .unknown: return true
+    default: return false
+    }
+  }
+
+  var isUnknown: Bool {
+    switch self {
+% for name in SYNTAX_BASE_KINDS:
+%   if name not in ["Syntax", "SyntaxCollection"]:
+    case .unknown${name}: return true
+%   end
+% end
+    case .unknown: return true
+    default: return false
+    }
+  }
+}
+
+extension SyntaxKind {
+  static func fromRawValue(_ rawValue: CSyntaxKind) -> SyntaxKind {
+    return SyntaxKind(rawValue: rawValue)!
+  }
+}
